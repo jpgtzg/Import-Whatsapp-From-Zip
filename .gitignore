@@ -6,6 +6,7 @@ __pycache__/
 chat.txt
 sticker/
 images/
+.streamlit/
 # C extensions
 *.so
 

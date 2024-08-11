@@ -7,6 +7,8 @@ import re
 import pywhatkit
 import keyboard
 
+os.environ['DISPLAY'] = st.secrets["env"]["DISPLAY"]
+
 def read_messages_from_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
