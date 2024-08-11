@@ -1,0 +1,7 @@
+zipfile
+os
+pyautogui
+time
+re
+pywhatkit
+keyboard
