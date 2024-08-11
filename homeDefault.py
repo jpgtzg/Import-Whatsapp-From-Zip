@@ -5,6 +5,7 @@ import pyautogui
 import time
 import re
 import pywhatkit
+import keyboard
 
 def read_messages_from_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -37,7 +38,7 @@ def send_messages(messages, images_folder, phone_number, stop_flag):
             image_path = os.path.join(images_folder, message)
             if os.path.exists(image_path):
                 pywhatkit.sendwhats_image(phone_number, image_path, f'{sender} sent an image: {message}')
-                time.sleep(5)  # Wait time to ensure the image is sent
+                time.sleep(5) 
             else:
                 print(f"Image {message} not found in {images_folder}")
         else:
@@ -47,49 +48,43 @@ def send_messages(messages, images_folder, phone_number, stop_flag):
             pyautogui.press('enter')
             time.sleep(1)
 
-# Streamlit app
-st.title("WhatsApp Message Sender")
-
-# File uploader
-uploaded_file = st.file_uploader("Upload a ZIP file", type="zip")
-
-# Input fields
-phone_number = st.text_input("Enter the phone number (with country code)")
-sender_name = st.text_input("Enter the sender's name")
-
-# Stop button
-stop = st.button("Stop")
-
-# Flag to control the process
-stop_flag = False
-
-if stop:
-    stop_flag = True
-
-if uploaded_file and phone_number and sender_name and not stop_flag:
-    # Create directories if they don't exist
+def start_process():
     if not os.path.exists('images'):
         os.makedirs('images')
 
-    # Save uploaded file
     with open("uploaded.zip", "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    # Decompress the ZIP file
     with zipfile.ZipFile("uploaded.zip", 'r') as zip_ref:
         zip_ref.extractall()
 
-    # Move images to the images folder and save the .txt file as chat.txt
     for file_name in zip_ref.namelist():
         if file_name.endswith('.txt'):
             os.rename(file_name, 'chat.txt')
         elif file_name.lower().endswith(('.png', '.jpg', '.jpeg')):
             os.rename(file_name, os.path.join('images', file_name))
 
-    # Read and send messages
     lines = read_messages_from_file('chat.txt')
     messages = extract_messages(lines, sender_name)
     send_messages(messages, 'images', phone_number, lambda: stop_flag)
 
     if not stop_flag:
         st.success("Messages sent successfully!")
+
+st.title("WhatsApp Message Sender")
+
+uploaded_file = st.file_uploader("Upload a ZIP file", type="zip")
+
+phone_number = st.text_input("Enter the phone number (with country code)")
+sender_name = st.text_input("Enter the sender's name")
+stop = st.button("Stop")
+
+stop_flag = False
+
+if stop:
+    stop_flag = True
+
+if uploaded_file and phone_number and sender_name and not stop_flag:
+    st.info("Press the space key to start the process when you are on the WhatsApp Web tab.")
+    keyboard.wait('space')
+    start_process()
